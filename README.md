@@ -12,3 +12,10 @@ Install the dependencies
 ```sh
 pip install discord.py yt_dlp
 ``` 
+
+FFMPEG is crucial to this bot works, so install it before use the bot
+
+Windows:
+```
+https://www.ffmpeg.org/download.html#build-windows
+```
