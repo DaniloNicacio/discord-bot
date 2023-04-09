@@ -32,3 +32,15 @@ Linux (Ubuntu)
 ```sh
 sudo apt-get install ffmpeg
 ``` 
+
+## Usage
+
+This bot use the "&" prefix but you can easily change it in the code<br>
+
+# Available commands
+
+- &play: adds a song to the playlist and plays it if it's the first song in the lista.
+- &pause: pauses the current song.
+- &resume: resumes the current song.
+- &stop: stops the current song and clears the playlist.
+- &leave: makes the bot leave the voice channel.
