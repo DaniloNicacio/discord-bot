@@ -121,3 +121,4 @@ async def stop(ctx):
     voice.stop()
 
 client.run('Your token goes here')
+#teste
