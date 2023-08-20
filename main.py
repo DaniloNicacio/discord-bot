@@ -40,27 +40,30 @@ async def play(ctx, query: str):
     url = get_video_url(query)
     playlist.append(url)
     if len(playlist) == 1:
-        
-        # If the bot is already connected to a voice channel, move to the author's voice channel. Otherwise, connect to the author's voice channel.
-        if ctx.voice_client is not None and ctx.voice_client.is_connected():
-            await ctx.voice_client.move_to(ctx.author.voice.channel)
-            voice = ctx.voice_client
-        else:
-            voiceChannel = discord.utils.get(ctx.guild.voice_channels, name=ctx.author.voice.channel.name)
-            voice = await voiceChannel.connect()
+        try:
+            # If the bot is already connected to a voice channel, move to the author's voice channel. Otherwise, connect to the author's voice channel.
+            if ctx.voice_client is not None and ctx.voice_client.is_connected():
+                await ctx.voice_client.move_to(ctx.author.voice.channel)
+                voice = ctx.voice_client
+            else:
+                voiceChannel = discord.utils.get(ctx.guild.voice_channels, name=ctx.author.voice.channel.name)
+                voice = await voiceChannel.connect()
 
-        # Get the voice client and download the song from the YouTube video URL
-        voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
-        for file in os.listdir("./"):
-            if file.endswith(".mp3"):
-                os.rename(file, "song.mp3")
+            # Get the voice client and download the song from the YouTube video URL
+            voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+            for file in os.listdir("./"):
+                if file.endswith(".mp3"):
+                    os.rename(file, "song.mp3")
 
-        # Play the song and start playing the next song in the playlist on a separate thread
-        voice.play(discord.FFmpegPCMAudio("song.mp3"))
-        asyncio.create_task(play_next(ctx))
-        
+            # Play the song and start playing the next song in the playlist on a separate thread
+            voice.play(discord.FFmpegPCMAudio("song.mp3"))
+            await ctx.send("I'm playing a amazing song")
+            asyncio.create_task(play_next(ctx))
+        except AttributeError:
+            await ctx.send("You need to enter a voice channel first")
+            
 # Function to play the next song in the playlist
 async def play_next(ctx):
     while True:
@@ -120,5 +123,5 @@ async def stop(ctx):
     voice = discord.utils.get(client.voice_clients, guild = ctx.guild)
     voice.stop()
 
-client.run('Your token goes here')
+client.run('OTc4MzQzMjUxNzYzMzk2NjM5.GdtEhy.-ZQNqeihzRjKaTljv-6Ih2ye_LVlCMwO1SGo4I')
 #teste
