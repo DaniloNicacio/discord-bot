@@ -132,5 +132,5 @@ async def stop(ctx):
     voice.stop()
 
 
-client.run('OTc4MzQzMjUxNzYzMzk2NjM5.GCOQfi.0CHTxv4nW9udWRGqY_WNr2JHmdoZ_LDsvG6oJ8')
+client.run('')
 # teste
