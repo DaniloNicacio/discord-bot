@@ -1,5 +1,3 @@
-#THIS IS A BRANCH OF TESTING, FEATURES MAY NOT WORK CORRECTLY 
-
 # Discord Music Bot
 Discord bot that allows playing YouTube music in a voice channel. The bot accepts commands to add songs to the playlist, play the next song, pause, resume, stop, and leave the voice channel.
 
