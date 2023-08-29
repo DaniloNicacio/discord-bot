@@ -1,3 +1,2 @@
-discord
+discord.py
 yt_dlp
-asyncio
