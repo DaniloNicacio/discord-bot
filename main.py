@@ -1,28 +1,21 @@
+import os
 import discord
 from discord.ext import commands
 import yt_dlp
-import os
-import asyncio
 import urllib.request
 import re
 
+ffmpeg_options = {'options': '-vn'}
 # Options for youtube-dlp to download the best audio quality as an MP3 file
-ydl_opts = {
-    'format': 'bestaudio/best',
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-        'preferredquality': '192',
-    }],
-}
+ydl_opts = {'format': 'bestaudio'}
 
 # Create a Discord client with the command prefix "&" and enable all intents, you can change the prefix here
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="&", intents=intents)
 
-# List to store the URLs of songs in the playlist
-playlist = []
-
+def get_audio(url):
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        return ydl.extract_info(url, download=False)
 
 # Helper function to get the YouTube video URL from a search query
 def get_video_url(query):
@@ -35,65 +28,27 @@ def get_video_url(query):
         url = "https://www.youtube.com/watch?v=" + video_ids[0]
     return url
 
-
 # Command to add a song to the playlist and play it if it's the first song in the list
 @client.command()
 async def play(ctx, query: str):
-    url = get_video_url(query)
-    playlist.append(url)
-    if len(playlist) == 1:
-
-        # If the bot is already connected to a voice channel, move to the author's voice channel.
-        # Otherwise, connect to the author's voice channel.
-        try:
-            if ctx.voice_client is not None and ctx.voice_client.is_connected():
-                await ctx.voice_client.move_to(ctx.author.voice.channel)
-            else:
-                voiceChannel = discord.utils.get(ctx.guild.voice_channels, name=ctx.author.voice.channel.name)
-                await voiceChannel.connect()
-
-            # Get the voice client and download the song from the YouTube video URL
-            voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([url])
-            for file in os.listdir("./"):
-                if file.endswith(".mp3"):
-                    os.rename(file, "song.mp3")
-
-            # Play the song and start playing the next song in the playlist on a separate thread
-            voice.play(discord.FFmpegPCMAudio("song.mp3"))
-            asyncio.create_task(play_next(ctx))
-
-        except AttributeError:
-            await ctx.send("I'm not in any voice channel")
-
-
-# Function to play the next song in the playlist
-async def play_next(ctx):
-    while True:
-        if len(playlist) > 0:
-            # Wait until the current song has finished playing before playing the next song
-            if ctx.voice_client is not None and ctx.voice_client.is_playing():
-                await asyncio.sleep(5)
-                continue
-
-            # Remove the current song from the playlist and download the next song from its URL
-            if os.path.exists("song.mp3"):
-                os.remove("song.mp3")
-                playlist.pop(0)
-            if len(playlist) > 0:
-                url = playlist[0]
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    ydl.download([url])
-                for file in os.listdir("./"):
-                    if file.endswith(".mp3"):
-                        os.rename(file, "song.mp3")
-
-                # Play the next song in the playlist
-                ctx.voice_client.play(discord.FFmpegPCMAudio("song.mp3"))
+    try:
+        if ctx.voice_client and ctx.voice_client.is_connected():
+            # If the bot is already connected to a voice channel, simply add the music to the playlist
+            url = get_video_url(query)
+            song = get_audio(url)
+            ctx.voice_client.play(discord.FFmpegPCMAudio(song["url"], **ffmpeg_options))
         else:
-            await asyncio.sleep(5)
-
+            # If the bot is not connected to a voice channel, connect to the author's voice channel and play the music
+            if ctx.author.voice:
+                voiceChannel = ctx.author.voice.channel
+                await voiceChannel.connect()
+                url = get_video_url(query)
+                song = get_audio(url)
+                ctx.voice_client.play(discord.FFmpegPCMAudio(song["url"], **ffmpeg_options))
+            else:
+                await ctx.send("You need to be in a voice channel to use this command.")
+    except AttributeError:
+        await ctx.send("Couldn't play the music.")
 
 # Function to leave the voice channel
 @client.command()
@@ -131,6 +86,5 @@ async def stop(ctx):
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     voice.stop()
 
-
-client.run('')
-# teste
+DISCORD_TOKEN = os.getenv("DISCORD_API")
+client.run(DISCORD_TOKEN)

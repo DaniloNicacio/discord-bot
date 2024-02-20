@@ -2,3 +2,4 @@ ven/
 .vscode
 *.mp3
 .idea/
+.env
