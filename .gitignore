@@ -1,3 +1,4 @@
-config.json
-node_modules
+ven/
+.vscode
 *.mp3
+.idea/
